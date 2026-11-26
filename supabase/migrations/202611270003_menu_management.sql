@@ -13,6 +13,8 @@ create table if not exists public.menu_items (
 );
 create index if not exists menu_items_public_order_idx on public.menu_items(is_published,sort_order);
 alter table public.menu_items enable row level security;
+grant select on public.menu_items to anon,authenticated;
+grant all on public.menu_items to service_role;
 drop policy if exists "Public can view published menu" on public.menu_items;
 create policy "Public can view published menu" on public.menu_items for select to anon,authenticated using (is_published=true);
 insert into public.menu_items(id,name,description,price,category,image,tag,is_available,is_published,sort_order) values
