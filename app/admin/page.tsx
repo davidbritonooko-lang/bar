@@ -5,7 +5,7 @@ type Order={id:string;order_number:string;customer_name:string;phone:string;fulf
 const states=["pending","confirmed","preparing","ready","completed","cancelled"];
 export default function AdminPage(){
  const [orders,setOrders]=useState<Order[]>([]);const [error,setError]=useState("");const [loading,setLoading]=useState(true);
- async function load(){const res=await fetch("/api/admin/orders",{cache:"no-store"});if(!res.ok){setError(res.status===403?"Your account is not authorized for staff access.":"Unable to load orders.");setLoading(false);return;}setOrders(await res.json());setLoading(false);}
+ async function load(){setError("");const res=await fetch("/api/admin/orders",{cache:"no-store"});if(!res.ok){setError(res.status===403?"Your account is not authorized for staff access.":"Unable to load orders.");setLoading(false);return;}setOrders(await res.json());setLoading(false);}
  useEffect(()=>{load();},[]);
  async function updateStatus(id:string,status:string){const res=await fetch(`/api/admin/orders/${id}`,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({status})});if(!res.ok){setError("Could not update this order.");return;}await load();}
  async function logout(){const supabase=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);await supabase.auth.signOut();location.href="/admin/login";}
