@@ -40,7 +40,7 @@ The cart is client-side and persisted in the browser. On submit, the server vali
 ## Admin
 Visit `/admin/login`. Admin/staff authorization is checked server-side in the API and enforced by database policies. The dashboard displays recent orders and allows staff to update operational status. Staff role provisioning is manual and trusted.
 
-## Not live yet — required before production
+## Menu management\n- Apply migration `202611270003_menu_management.sql`.\n- `/admin/menu` allows staff to create, edit, publish, unpublish, and toggle item availability.\n- Public menu and server-side order pricing read published database items; unavailable items cannot be ordered.\n\n## Not live yet — required before production
 - **Payments:** M-Pesa/card gateway is not integrated. Payment fields are status placeholders only. Add gateway initiation, provider callback verification, transaction reconciliation, idempotency, and sandbox/live tests before accepting paid orders.
 - **Rate limiting and abuse controls:** protect order creation and auth endpoints with a durable rate limiter.
 - **Notifications:** email/SMS/WhatsApp confirmations and staff alerts.
