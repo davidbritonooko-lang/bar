@@ -1,0 +1,4 @@
+import Link from "next/link";
+export function SiteFooter() {
+  return <footer className="site-footer"><div className="footer-top"><div><p className="eyebrow">A PLACE TO RETURN TO</p><h2>Stay a little<br/><em>longer.</em></h2></div><div className="footer-links"><div><span className="footer-label">EXPLORE</span><Link href="/menu">Menu</Link><Link href="/events">Experiences</Link><Link href="/#story">Our story</Link></div><div><span className="footer-label">FIND US</span><span>Location details coming soon</span><span>Opening hours coming soon</span><a href="mailto:hello@noir-ember.example">Email us</a></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} NOIR & EMBER</span><span>Made for the moments between.</span><span className="footer-wordmark">N&E</span></div></footer>;
+}
