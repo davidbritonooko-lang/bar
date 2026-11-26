@@ -1,11 +1,12 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import type { MenuItem } from "@/lib/menu";
 
 type CartLine = { item: MenuItem; quantity: number };
 type CartContextValue = { lines: CartLine[]; count: number; total: number; add: (item: MenuItem) => void; change: (id: string, delta: number) => void; clear: () => void };
 const Context = createContext<CartContextValue | null>(null);
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   useEffect(() => { try { const saved = localStorage.getItem("noir-cart"); if (saved) setLines(JSON.parse(saved)); } catch { localStorage.removeItem("noir-cart"); } }, []);
   useEffect(() => { localStorage.setItem("noir-cart", JSON.stringify(lines)); }, [lines]);
