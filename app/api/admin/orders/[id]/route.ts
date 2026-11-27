@@ -9,6 +9,10 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
  if(!authorized)return NextResponse.json({error:"Staff access required"},{status:403});
  const parsed=bodySchema.safeParse(await request.json());if(!parsed.success)return NextResponse.json({error:"Invalid status"},{status:400});
  const {data,error}=await supabase.from("orders").update({status:parsed.data.status,updated_at:new Date().toISOString()}).eq("id",id).select("id,status").single();
- if(error)return NextResponse.json({error:"Could not update order"},{status:500});
+ if(error){
+  if(error.code==="22023")return NextResponse.json({error:"This order status transition is not allowed."},{status:409});
+  if(error.code==="PGRST116")return NextResponse.json({error:"Order not found."},{status:404});
+  return NextResponse.json({error:"Could not update order"},{status:500});
+ }
  return NextResponse.json(data);
 }
