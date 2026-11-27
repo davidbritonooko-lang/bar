@@ -1,0 +1,12 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
+import { requireAdmin } from "@/lib/supabase-server";
+const dateSchema=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>!Number.isNaN(Date.parse(v))).nullable();
+const timeSchema=z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable();
+const eventSchema=z.object({id:z.string().regex(/^[a-z0-9-]{2,80}$/),title:z.string().trim().min(2).max(100),label:z.string().trim().min(2).max(120),description:z.string().trim().max(500),image:z.string().trim().url().max(1000).refine(v=>v.startsWith("https://"),"Image URL must use HTTPS"),event_date:dateSchema,start_time:timeSchema,end_time:timeSchema,venue:z.string().trim().min(2).max(120),is_published:z.boolean(),is_featured:z.boolean(),sort_order:z.number().int().min(0).max(10000)});
+function db(){const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)throw new Error("Database configuration missing");return createClient(url,key,{auth:{persistSession:false}});}
+async function staff(){const {user,authorized}=await requireAdmin();return Boolean(user&&authorized);}
+function originAllowed(request:Request){const origin=request.headers.get("origin");return !!origin&&origin===new URL(request.url).origin;}
+export async function GET(){if(!await staff())return NextResponse.json({error:"Staff access required"},{status:403});try{const {data,error}=await db().from("events").select("*").order("event_date",{ascending:true,nullsFirst:false}).order("sort_order",{ascending:true});if(error)throw error;return NextResponse.json(data);}catch{return NextResponse.json({error:"Event data unavailable"},{status:503});}}
+export async function POST(request:Request){if(!originAllowed(request))return NextResponse.json({error:"Invalid origin"},{status:403});if(!await staff())return NextResponse.json({error:"Staff access required"},{status:403});let body;try{body=await request.json();}catch{return NextResponse.json({error:"Invalid JSON request"},{status:400});}const parsed=eventSchema.safeParse(body);if(!parsed.success)return NextResponse.json({error:"Invalid event details"},{status:400});try{const {data,error}=await db().from("events").insert(parsed.data).select().single();if(error){if(error.code==="23505")return NextResponse.json({error:"That event ID already exists."},{status:409});throw error;}return NextResponse.json(data,{status:201});}catch{return NextResponse.json({error:"Could not save event"},{status:500});}}
